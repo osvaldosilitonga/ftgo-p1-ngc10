@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"runtime/pprof"
 )
 
 func main() {
@@ -10,6 +12,30 @@ func main() {
 			fmt.Println("Error: ", r)
 		}
 	}()
+
+	// ## PROFILING ##
+	// ## 1. CPU ##
+	cpu, errCPU := os.Create("cpu.prof")
+	if errCPU != nil {
+		panic(errCPU)
+	}
+	defer cpu.Close()
+
+	pprof.StartCPUProfile(cpu)
+	defer pprof.StopCPUProfile()
+
+	// ## 2. Memory ##
+	memory, errMemory := os.Create("memory.prof")
+	if errMemory != nil {
+		panic(errMemory)
+	}
+	defer memory.Close()
+
+	errMemory = pprof.WriteHeapProfile(memory)
+	if errMemory != nil {
+		panic(errMemory)
+	}
+	// --------------------------------------------------
 
 	var choice string
 
